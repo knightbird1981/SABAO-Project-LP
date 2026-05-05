@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イメージをカタチに | AI-Powered Designer & Developer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI×デザイン×開発で、あなたのイメージをカタチに。超高速・高品質なWeb制作を提供します。">
+  <meta property="og:title" content="イメージをカタチに | AI-Powered Designer & Developer">
+  <meta property="og:description" content="AI-powered implementation. What was once impossible is now reality.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== SVG（非表示） ===== -->
+<svg id="birdSVG" viewBox="0 0 500 500" style="display:none;">
+  <path id="birdPath"
+    d="M50,250
+       Q150,100 250,250
+       Q350,400 450,250
+       Q350,300 250,200
+       Q150,300 50,250 Z"
+  />
+</svg>
+
+<!-- ===== PC Three.js Canvas ===== -->
+<canvas id="webgl"></canvas>
+
+<!-- ===== SP背景 ===== -->
+<div id="mobile-bg">
+  <div class="mobile-orb orb1"></div>
+  <div class="mobile-orb orb2"></div>
+  <div class="mobile-orb orb3"></div>
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">
+      <span class="logo-mark">✦</span>
+      <span class="logo-text">Particle<span class="logo-accent">Bird</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#intro">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#portfolio">Work</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#contact" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="メニュー">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-inner">
+    <a href="#intro"     class="mobile-link">About</a>
+    <a href="#skills"    class="mobile-link">Skills</a>
+    <a href="#portfolio" class="mobile-link">Work</a>
+    <a href="#process"   class="mobile-link">Process</a>
+    <a href="#contact"   class="mobile-link mobile-link-cta">Contact</a>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<main>
+
+  <!-- ==================== HERO ==================== -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid-lines"></div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow reveal">AI-Powered Designer &amp; Developer</div>
+      <h1 class="hero-headline reveal reveal-delay-1">
+        <span class="accent-cyan">イメージ</span>を<br/>
+        <span class="accent-green">カタチ</span>に
+      </h1>
+      <p class="hero-headline-en reveal reveal-delay-2">Make ideas tangible.</p>
+      <p class="hero-body reveal reveal-delay-3">
+        AI-powered implementation.<br/>
+        What was once impossible is now reality.
+      </p>
+      <div class="hero-actions reveal reveal-delay-4">
+        <a href="#contact" class="btn-primary">Let's talk about your project</a>
+        <a href="#portfolio" class="btn-ghost">View Work</a>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+  </section>
+
+  <!-- ==================== INTRO ==================== -->
+  <section id="intro">
+    <div class="section-grid"></div>
+    <div class="intro-inner">
+
+      <div class="intro-text reveal">
+        <div class="section-label">About</div>
+        <h2>AIの力で、<br/><span class="accent-cyan">不可能を可能</span>に</h2>
+        <p class="intro-lead">
+          デザイン・開発・AIを融合させた<br/>次世代のクリエイティブスタジオ。
+        </p>
+        <p class="intro-body">
+          従来の Web 制作の枠を超え、AI を活用した高速実装と
+          洗練されたデザインで、あなたのビジネスを加速させます。
+          アイデアの段階から、リリースまで一気通貫でサポート。
+        </p>
+        <div class="intro-stats">
+          <div class="stat-item">
+            <span class="stat-num">200<span class="stat-unit">+</span></span>
+            <span class="stat-label">Projects</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-num">5<span class="stat-unit">x</span></span>
+            <span class="stat-label">Faster</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-num">100<span class="stat-unit">%</span></span>
+            <span class="stat-label">Satisfaction</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="intro-visual reveal reveal-delay-2">
+        <div class="intro-glow"></div>
+        <div class="intro-card">
+          <div class="card-header">
+            <div class="card-dots-row">
+              <span class="win-dot red"></span>
+              <span class="win-dot yellow"></span>
+              <span class="win-dot green"></span>
+            </div>
+            <span class="card-tag">AI × Design Studio</span>
+          </div>
+          <div class="card-body">
+            <div class="card-line-wrap">
+              <span class="line-label accent-cyan">design</span>
+              <div class="card-bar" style="width:88%"></div>
+            </div>
+            <div class="card-line-wrap">
+              <span class="line-label accent-green">develop</span>
+              <div class="card-bar" style="width:76%"></div>
+            </div>
+            <div class="card-line-wrap">
+              <span class="line-label accent-purple">AI</span>
+              <div class="card-bar" style="width:95%"></div>
+            </div>
+            <div class="card-line-wrap">
+              <span class="line-label">branding</span>
+              <div class="card-bar" style="width:62%"></div>
+            </div>
+          </div>
+          <div class="card-footer-stat">
+            <span class="footer-stat-num accent-cyan">↑ 230%</span>
+            <span class="footer-stat-label">CVR Improvement</span>
+          </div>
+        </div>
+        <div class="floating-badge badge-1">
+          <span class="badge-icon">⚡</span>
+          <span>High Speed</span>
+        </div>
+        <div class="floating-badge badge-2">
+          <span class="badge-icon">✦</span>
+          <span>AI Native</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SKILLS ==================== -->
+  <section id="skills">
+    <div class="section-grid"></div>
+    <div class="skills-inner">
+
+      <div class="skills-header reveal">
+        <div class="section-label">Skills</div>
+        <h2>提供できること</h2>
+        <p class="skills-sub">Design × Develop × AI</p>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-card reveal">
+          <div class="skill-icon-wrap"><span class="skill-icon">◈</span></div>
+          <h3>UI / UX Design</h3>
+          <p>ユーザー体験を最優先に考えたデザイン設計。ワイヤーフレームからプロトタイプまで、高品質な UI を提供します。</p>
+          <div class="skill-tags">
+            <span>Figma</span><span>Prototyping</span><span>UX Research</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal reveal-delay-1">
+          <div class="skill-icon-wrap"><span class="skill-icon">⟡</span></div>
+          <h3>Web Development</h3>
+          <p>モダンな技術スタックを駆使した高速・高品質な Web サイト・アプリケーション開発。</p>
+          <div class="skill-tags">
+            <span>React</span><span>Next.js</span><span>TypeScript</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal reveal-delay-2">
+          <div class="skill-icon-wrap"><span class="skill-icon">◎</span></div>
+          <h3>AI Implementation</h3>
+          <p>最新 AI モデルをプロダクトに統合。チャットボット・画像生成・コンテンツ自動化まで幅広く対応。</p>
+          <div class="skill-tags">
+            <span>Claude</span><span>GPT-4</span><span>Midjourney</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal reveal-delay-3">
+          <div class="skill-icon-wrap"><span class="skill-icon">✦</span></div>
+          <h3>Creative Direction</h3>
+          <p>ブランドの世界観を構築し、ビジュアルからコピーまでトータルにディレクションします。</p>
+          <div class="skill-tags">
+            <span>Branding</span><span>Motion</span><span>Copywriting</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal reveal-delay-1">
+          <div class="skill-icon-wrap"><span class="skill-icon">⬡</span></div>
+          <h3>No-Code / Low-Code</h3>
+          <p>Webflow・Framer などノーコードツールを活用した超高速サイト構築で、コストを最小化。</p>
+          <div class="skill-tags">
+            <span>Webflow</span><span>Framer</span><span>Notion</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal reveal-delay-2">
+          <div class="skill-icon-wrap"><span class="skill-icon">◇</span></div>
+          <h3>Performance &amp; SEO</h3>
+          <p>Core Web Vitals 最適化・SEO 施策・アクセシビリティ対応で、検索上位と高 CVR を同時に実現。</p>
+          <div class="skill-tags">
+            <span>Core Web Vitals</span><span>SEO</span><span>Analytics</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="skills-character reveal reveal-delay-3">
+        <div class="skills-glow-ring"></div>
+        <div class="skills-center-badge">
+          <span class="skills-badge-num">6</span>
+          <span class="skills-badge-label">専門領域</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== PORTFOLIO ==================== -->
+  <section id="portfolio">
+    <div class="section-grid"></div>
+    <div class="portfolio-inner">
+
+      <div class="portfolio-header reveal">
+        <div class="section-label">Portfolio</div>
+        <h2>制作実績</h2>
+        <p class="portfolio-sub">Selected Works</p>
+      </div>
+
+      <div class="portfolio-grid">
+        <div class="portfolio-item reveal">
+          <div class="portfolio-visual pv-1">
+            <div class="pv-grid"></div>
+            <span class="pv-label">Web App</span>
+            <div class="pv-lines">
+              <div class="pv-line"></div><div class="pv-line"></div>
+              <div class="pv-line"></div><div class="pv-line"></div>
+            </div>
+          </div>
+          <div class="portfolio-info">
+            <span class="portfolio-tag">AI × SaaS</span>
+            <h3>AI Analytics Dashboard</h3>
+            <p>リアルタイムデータ分析 + AI 予測エンジンを統合した SaaS プロダクト。CVR 180% 改善。</p>
+            <span class="portfolio-arrow">View Case →</span>
+          </div>
+        </div>
+
+        <div class="portfolio-item reveal reveal-delay-1">
+          <div class="portfolio-visual pv-2">
+            <div class="pv-grid"></div>
+            <span class="pv-label">Brand</span>
+            <div class="pv-circles">
+              <div class="pv-circle c1"></div>
+              <div class="pv-circle c2"></div>
+              <div class="pv-circle c3"></div>
+            </div>
+          </div>
+          <div class="portfolio-info">
+            <span class="portfolio-tag">Branding × Web</span>
+            <h3>Corporate Redesign</h3>
+            <p>スタートアップのブランドリデザインからコーポレートサイト構築まで、一貫してディレクション。</p>
+            <span class="portfolio-arrow">View Case →</span>
+          </div>
+        </div>
+
+        <div class="portfolio-item reveal reveal-delay-2">
+          <div class="portfolio-visual pv-3">
+            <div class="pv-grid"></div>
+            <span class="pv-label">E-Commerce</span>
+            <div class="pv-graph">
+              <div class="pv-bar" style="height:40%"></div>
+              <div class="pv-bar" style="height:65%"></div>
+              <div class="pv-bar" style="height:55%"></div>
+              <div class="pv-bar" style="height:80%"></div>
+              <div class="pv-bar" style="height:95%"></div>
+            </div>
+          </div>
+          <div class="portfolio-info">
+            <span class="portfolio-tag">EC × UX</span>
+            <h3>Premium EC Site</h3>
+            <p>コンバージョン率 230% 改善を達成した EC サイトの UX リデザイン × フルスタック開発。</p>
+            <span class="portfolio-arrow">View Case →</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== PROCESS ==================== -->
+  <section id="process">
+    <div class="section-grid"></div>
+    <div class="process-inner">
+
+      <div class="process-header reveal">
+        <div class="section-label">Process</div>
+        <h2>制作の流れ</h2>
+        <p class="process-sub">シンプルで透明性の高いプロセスで進行します</p>
+      </div>
+
+      <div class="process-steps">
+        <div class="process-step reveal">
+          <div class="step-num-wrap">
+            <div class="step-num">01</div>
+            <div class="step-connector"></div>
+          </div>
+          <div class="step-content">
+            <h3>ヒアリング</h3>
+            <p>目標・課題・ターゲットを深くヒアリング。ゴールから逆算して最適な戦略を設計します。</p>
+            <div class="step-detail">無料相談 · オンライン対応</div>
+          </div>
+        </div>
+
+        <div class="process-step reveal reveal-delay-1">
+          <div class="step-num-wrap">
+            <div class="step-num">02</div>
+            <div class="step-connector"></div>
+          </div>
+          <div class="step-content">
+            <h3>設計・デザイン</h3>
+            <p>ワイヤーフレームからビジュアルデザインまで、AI を活用して高速かつ高品質に仕上げます。</p>
+            <div class="step-detail">最短 3 日〜納品</div>
+          </div>
+        </div>
+
+        <div class="process-step reveal reveal-delay-2">
+          <div class="step-num-wrap">
+            <div class="step-num">03</div>
+            <div class="step-connector"></div>
+          </div>
+          <div class="step-content">
+            <h3>開発・実装</h3>
+            <p>モダンな技術スタックで高速実装。AI コーディングで従来の 5 倍のスピードで開発します。</p>
+            <div class="step-detail">テスト込み · CI/CD 対応</div>
+          </div>
+        </div>
+
+        <div class="process-step reveal reveal-delay-3">
+          <div class="step-num-wrap">
+            <div class="step-num">04</div>
+          </div>
+          <div class="step-content">
+            <h3>納品・サポート</h3>
+            <p>品質チェック後に納品。公開後も継続的なサポートで成果を最大化します。</p>
+            <div class="step-detail">保守プランあり</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== CONTACT ==================== -->
+  <section id="contact">
+    <div class="section-grid"></div>
+    <div class="contact-inner">
+
+      <div class="contact-left reveal">
+        <div class="section-label">Contact</div>
+        <h2>ご相談ください</h2>
+        <p class="contact-en-sub">Let's work together.</p>
+        <p class="contact-body">
+          プロジェクトのご相談・お見積もり依頼、<br/>
+          まずはお気軽にお問い合わせください。<br/>
+          24 時間以内にご返信いたします。
+        </p>
+        <div class="contact-info-list">
+          <div class="contact-info-item">
+            <span class="info-icon">✉</span>
+            <span>hello@particlebird.dev</span>
+          </div>
+          <div class="contact-info-item">
+            <span class="info-icon">⏱</span>
+            <span>24h 以内に返信</span>
+          </div>
+          <div class="contact-info-item">
+            <span class="info-icon">🌐</span>
+            <span>オンライン対応 · 全国 OK</span>
+          </div>
+        </div>
+        <div class="contact-envelope">
+          <div class="envelope-body">
+            <div class="envelope-flap"></div>
+            <div class="envelope-line"></div>
+            <div class="envelope-line short"></div>
+            <div class="envelope-glow"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-right reveal reveal-delay-2">
+        <form class="contact-form" id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">お名前 <span class="req">*</span></label>
+              <input id="name" type="text" placeholder="山田 太郎" required />
+            </div>
+            <div class="form-group">
+              <label for="email">メールアドレス <span class="req">*</span></label>
+              <input id="email" type="email" placeholder="hello@example.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="category">ご相談内容</label>
+            <select id="category">
+              <option value="">選択してください</option>
+              <option>Web サイト制作</option>
+              <option>Web アプリ開発</option>
+              <option>ブランディング</option>
+              <option>AI 導入支援</option>
+              <option>その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">メッセージ <span class="req">*</span></label>
+            <textarea id="message" rows="5" placeholder="プロジェクトの詳細をお聞かせください..." required></textarea>
+          </div>
+          <button type="submit" class="btn-submit">
+            <span class="btn-submit-text">送信する</span>
+            <span class="btn-submit-arrow">→</span>
+            <span class="btn-submit-glow"></span>
+          </button>
+          <p class="form-note">送信後、自動返信メールをお送りします。</p>
+        </form>
+        <div class="form-success" id="formSuccess">
+          <div class="success-icon">✦</div>
+          <h3>送信完了しました！</h3>
+          <p>24 時間以内にご返信いたします。</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <span class="logo-mark">✦</span>
+      <span class="logo-text">Particle<span class="logo-accent">Bird</span></span>
+    </div>
+    <p class="footer-copy">© 2026 ParticleBird. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r155/three.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
