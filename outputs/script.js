@@ -71,25 +71,28 @@ const isMobile = window.innerWidth < 768;
   let pts = buildParticles();
 
   /* ---- State ---- */
-  let progress = 1, dir = -1, lastMove = Date.now();
+  // progress=0: scattered  /  progress=1: bird formed
+  let progress = 0;   // start scattered
+  let dir      = 0;
+  let lastMove = 0;   // 0 = never moved → start scattered
   let scrollY  = 0, mouseX = 0, mouseY = 0;
   let rotAngle = 0, time   = 0;
 
   window.addEventListener('mousemove', e => {
-    dir = -1; lastMove = Date.now();
-    mouseX = (e.clientX / W - 0.5) * 2;
-    mouseY = (e.clientY / H - 0.5) * 2;
+    dir      = 1;           // mouse moves → FORM bird
+    lastMove = Date.now();
+    mouseX   = (e.clientX / W - 0.5) * 2;
+    mouseY   = (e.clientY / H - 0.5) * 2;
   });
   window.addEventListener('scroll', () => { scrollY = window.scrollY; });
   window.addEventListener('resize', () => {
     W = window.innerWidth; H = window.innerHeight;
     canvas.width = W; canvas.height = H;
-    pts = buildParticles();   // rebuild for new size
+    pts = buildParticles();
   });
 
   /* ---- Render loop ---- */
-  const LERP_POS  = 0.055;   // position smoothing
-  const LERP_PROG = 0.007;   // morph speed
+  const MORPH_SPEED = 0.018;  // morph speed (was 0.007, now faster)
 
   function animate() {
     requestAnimationFrame(animate);
@@ -97,8 +100,9 @@ const isMobile = window.innerWidth < 768;
 
     ctx.clearRect(0, 0, W, H);
 
-    if (Date.now() - lastMove > 2500) dir = 1;
-    progress = clamp(progress + LERP_PROG * dir, 0, 1);
+    // Idle 2.5s → scatter; mouse active → form bird
+    if (lastMove > 0 && Date.now() - lastMove > 2500) dir = -1;
+    progress = clamp(progress + MORPH_SPEED * dir, 0, 1);
     rotAngle += 0.0005;
 
     const offX = W / 2 + mouseX * 25 + scrollY * 0.04;
@@ -107,27 +111,16 @@ const isMobile = window.innerWidth < 768;
     ctx.save();
     ctx.translate(offX, offY);
     ctx.rotate(rotAngle);
-
-    // Additive blending → automatic glow effect, NO per-particle gradient needed
     ctx.globalCompositeOperation = 'lighter';
 
     for (let i = 0; i < NUM; i++) {
       const p = pts[i];
 
-      // Move toward target
-      const goalX = lerp(p.rx, p.tx, progress);
-      const goalY = lerp(p.ry, p.ty, progress);
-      p.x = lerp(p.x, goalX, LERP_POS);
-      p.y = lerp(p.y, goalY, LERP_POS);
+      // Direct lerp → no double-smoothing lag
+      const sx = lerp(p.rx, p.tx, progress) + Math.sin(p.phase + time) * 2.5;
+      const sy = lerp(p.ry, p.ty, progress) + Math.cos(p.phase + time * 0.8) * 2.5;
 
-      // Organic micro-sway (cheap sin/cos)
-      const sx = p.x + Math.sin(p.phase + time) * 2;
-      const sy = p.y + Math.cos(p.phase + time * 0.8) * 2;
-
-      // Vary alpha slightly per particle (cheap: use globalAlpha before drawImage)
       ctx.globalAlpha = 0.55 + Math.sin(p.phase + time * 0.6) * 0.2;
-
-      // Stamp pre-rendered sprite (fast!)
       ctx.drawImage(p.sprite, sx - SPRITE_R, sy - SPRITE_R);
     }
 
