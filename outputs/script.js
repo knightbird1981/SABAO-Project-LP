@@ -44,28 +44,45 @@ const isMobile = window.innerWidth < 768;
   const spritePurple = makeSprite(155, 92,  246, SPRITE_R);
   const spriteGreen  = makeSprite(57,  255, 20,  SPRITE_R);
 
-  /* ---- Sample SVG path → particle array ---- */
-  const NUM = 4000;   // 8000→4000: half the particles, same visual density
+  /* ---- Sample all birdPart paths → particle array ---- */
+  const NUM       = 4500;
+  const THICKNESS = 14;   // SVG単位の厚み → 輪郭が面として見える
 
   function buildParticles() {
-    const path = document.getElementById('birdPath');
-    const len  = path.getTotalLength();
-    const arr  = new Array(NUM);
-    for (let i = 0; i < NUM; i++) {
-      const p = path.getPointAtLength((i / NUM) * len);
-      arr[i] = {
-        tx: (p.x - 250) / 500 * W * 0.7,
-        ty: (p.y - 250) / 500 * H * 0.5,
-        rx: (Math.random() - 0.5) * W * 1.4,
-        ry: (Math.random() - 0.5) * H * 1.2,
-        x:  (Math.random() - 0.5) * W * 1.4,
-        y:  (Math.random() - 0.5) * H * 1.2,
-        phase: Math.random() * Math.PI * 2,
-        // assign sprite once: 70% cyan, 20% purple, 10% green
-        sprite: i % 10 < 7 ? spriteCyan : i % 10 < 9 ? spritePurple : spriteGreen,
-      };
-    }
-    return arr;
+    const pathEls = Array.from(document.querySelectorAll('.birdPart'));
+    const lengths = pathEls.map(p => p.getTotalLength());
+    const totalLen = lengths.reduce((a, b) => a + b, 0);
+
+    const arr = [];
+
+    pathEls.forEach((pathEl, pi) => {
+      const isLast = pi === pathEls.length - 1;
+      const count  = isLast
+        ? NUM - arr.length
+        : Math.round(NUM * lengths[pi] / totalLen);
+      const plen = lengths[pi];
+
+      for (let j = 0; j < count; j++) {
+        const t  = (j + Math.random()) / Math.max(count, 1);
+        const pt = pathEl.getPointAtLength(clamp(t * plen, 0, plen));
+        // 厚み：パスの輪郭線をランダムにオフセット → 塗りつぶしに見える
+        const ox = (Math.random() - 0.5) * THICKNESS;
+        const oy = (Math.random() - 0.5) * THICKNESS;
+        const si = arr.length;
+        arr.push({
+          tx: (pt.x + ox - 250) / 500 * W * 0.78,
+          ty: (pt.y + oy - 250) / 500 * H * 0.58,
+          rx: (Math.random() - 0.5) * W * 1.4,
+          ry: (Math.random() - 0.5) * H * 1.2,
+          x:  (Math.random() - 0.5) * W * 1.4,
+          y:  (Math.random() - 0.5) * H * 1.2,
+          phase:  Math.random() * Math.PI * 2,
+          sprite: si % 10 < 7 ? spriteCyan : si % 10 < 9 ? spritePurple : spriteGreen,
+        });
+      }
+    });
+
+    return arr.slice(0, NUM);
   }
 
   let pts = buildParticles();
