@@ -1,6 +1,6 @@
 /* ============================================================
-   SABAO Project LP — Main Script
-   Pure Canvas 2D Particles (no Three.js) + UX interactions
+   SABAO Project LP — Main Script  (Optimised Canvas 2D)
+   Sprite-based particles, additive blending — no Three.js
 ============================================================ */
 
 'use strict';
@@ -10,7 +10,7 @@ const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 const isMobile = window.innerWidth < 768;
 
 /* ──────────────────────────────────────────────
-   1. CANVAS 2D  PARTICLE BIRD
+   1. CANVAS 2D PARTICLE BIRD  (high-performance)
 ────────────────────────────────────────────── */
 (function initParticles() {
   if (isMobile) return;
@@ -23,123 +23,112 @@ const isMobile = window.innerWidth < 768;
   canvas.width  = W;
   canvas.height = H;
 
-  /* --- SVG path → 2D points (cx/cy centred) --- */
-  function sampleSVGPath(numPoints) {
-    const path   = document.getElementById('birdPath');
-    const len    = path.getTotalLength();
-    const pts    = [];
-    for (let i = 0; i < numPoints; i++) {
-      const p = path.getPointAtLength((i / numPoints) * len);
-      // map SVG 0–500 → canvas-centred coords
-      pts.push({
+  /* ---- Pre-render particle sprites (created ONCE) ---- */
+  function makeSprite(r, g, b, radius) {
+    const c   = document.createElement('canvas');
+    const dia = radius * 2;
+    c.width   = dia;
+    c.height  = dia;
+    const sc  = c.getContext('2d');
+    const grd = sc.createRadialGradient(radius, radius, 0, radius, radius, radius);
+    grd.addColorStop(0,   `rgba(${r},${g},${b},1)`);
+    grd.addColorStop(0.4, `rgba(${r},${g},${b},0.5)`);
+    grd.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    sc.fillStyle = grd;
+    sc.fillRect(0, 0, dia, dia);
+    return c;
+  }
+
+  const SPRITE_R  = 6;                              // particle radius px
+  const spriteCyan   = makeSprite(0,   229, 255, SPRITE_R);
+  const spritePurple = makeSprite(155, 92,  246, SPRITE_R);
+  const spriteGreen  = makeSprite(57,  255, 20,  SPRITE_R);
+
+  /* ---- Sample SVG path → particle array ---- */
+  const NUM = 4000;   // 8000→4000: half the particles, same visual density
+
+  function buildParticles() {
+    const path = document.getElementById('birdPath');
+    const len  = path.getTotalLength();
+    const arr  = new Array(NUM);
+    for (let i = 0; i < NUM; i++) {
+      const p = path.getPointAtLength((i / NUM) * len);
+      arr[i] = {
         tx: (p.x - 250) / 500 * W * 0.7,
         ty: (p.y - 250) / 500 * H * 0.5,
         rx: (Math.random() - 0.5) * W * 1.4,
         ry: (Math.random() - 0.5) * H * 1.2,
         x:  (Math.random() - 0.5) * W * 1.4,
         y:  (Math.random() - 0.5) * H * 1.2,
-        // per-particle colour phase
         phase: Math.random() * Math.PI * 2,
-        size:  Math.random() * 1.5 + 0.8,
-      });
+        // assign sprite once: 70% cyan, 20% purple, 10% green
+        sprite: i % 10 < 7 ? spriteCyan : i % 10 < 9 ? spritePurple : spriteGreen,
+      };
     }
-    return pts;
+    return arr;
   }
 
-  const NUM    = 8000;
-  const pts    = sampleSVGPath(NUM);
+  let pts = buildParticles();
 
-  /* --- State --- */
-  let progress = 1;
-  let dir      = -1;
-  let lastMove = Date.now();
-  let scrollY  = 0;
-  let mouseX   = 0, mouseY   = 0;
-  let rotAngle = 0;
-  let time     = 0;
+  /* ---- State ---- */
+  let progress = 1, dir = -1, lastMove = Date.now();
+  let scrollY  = 0, mouseX = 0, mouseY = 0;
+  let rotAngle = 0, time   = 0;
 
   window.addEventListener('mousemove', e => {
-    dir      = -1;
-    lastMove = Date.now();
-    mouseX   = (e.clientX / W - 0.5) * 2;
-    mouseY   = (e.clientY / H - 0.5) * 2;
+    dir = -1; lastMove = Date.now();
+    mouseX = (e.clientX / W - 0.5) * 2;
+    mouseY = (e.clientY / H - 0.5) * 2;
   });
   window.addEventListener('scroll', () => { scrollY = window.scrollY; });
-
   window.addEventListener('resize', () => {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width  = W;
-    canvas.height = H;
-    // Recalculate target positions for new viewport
-    const path = document.getElementById('birdPath');
-    const len  = path.getTotalLength();
-    pts.forEach((p, i) => {
-      const sp = path.getPointAtLength((i / NUM) * len);
-      p.tx = (sp.x - 250) / 500 * W * 0.7;
-      p.ty = (sp.y - 250) / 500 * H * 0.5;
-    });
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W; canvas.height = H;
+    pts = buildParticles();   // rebuild for new size
   });
 
-  /* --- Draw a single glowing particle --- */
-  function drawParticle(x, y, size, t) {
-    // colour: cyan→purple based on time + phase
-    const mix   = (Math.sin(t * 1.2 + pts[0]?.phase || 0) + 1) * 0.5;
-    const r     = Math.round(lerp(0,   155, mix));
-    const g     = Math.round(lerp(229, 92,  mix));
-    const b     = Math.round(lerp(255, 246, mix));
-    const alpha = 0.7;
+  /* ---- Render loop ---- */
+  const LERP_POS  = 0.055;   // position smoothing
+  const LERP_PROG = 0.007;   // morph speed
 
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, size * 2.5);
-    grad.addColorStop(0,   `rgba(${r},${g},${b},${alpha})`);
-    grad.addColorStop(0.4, `rgba(${r},${g},${b},${alpha * 0.5})`);
-    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
-
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, size * 2.5, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  /* --- Animation loop --- */
   function animate() {
     requestAnimationFrame(animate);
-    time += 0.025;
+    time += 0.022;
 
-    // Clear
     ctx.clearRect(0, 0, W, H);
 
-    // Auto-scatter when idle
     if (Date.now() - lastMove > 2500) dir = 1;
-    progress = clamp(progress + 0.007 * dir, 0, 1);
+    progress = clamp(progress + LERP_PROG * dir, 0, 1);
+    rotAngle += 0.0005;
 
-    // Slow rotation
-    rotAngle += 0.0006;
-
-    // Camera parallax offset
-    const offX = W / 2 + mouseX * 30 + scrollY * 0.05;
-    const offY = H / 2 + mouseY * 20;
+    const offX = W / 2 + mouseX * 25 + scrollY * 0.04;
+    const offY = H / 2 + mouseY * 18;
 
     ctx.save();
     ctx.translate(offX, offY);
     ctx.rotate(rotAngle);
 
+    // Additive blending → automatic glow effect, NO per-particle gradient needed
+    ctx.globalCompositeOperation = 'lighter';
+
     for (let i = 0; i < NUM; i++) {
       const p = pts[i];
 
-      // Lerp position
-      p.x = lerp(p.x, lerp(p.rx, p.tx, progress), 0.06);
-      p.y = lerp(p.y, lerp(p.ry, p.ty, progress), 0.06);
+      // Move toward target
+      const goalX = lerp(p.rx, p.tx, progress);
+      const goalY = lerp(p.ry, p.ty, progress);
+      p.x = lerp(p.x, goalX, LERP_POS);
+      p.y = lerp(p.y, goalY, LERP_POS);
 
-      // Organic sway
-      const sx = p.x + Math.sin(p.y * 0.012 + time) * 2.5;
-      const sy = p.y + Math.cos(p.x * 0.010 + time) * 2.5;
+      // Organic micro-sway (cheap sin/cos)
+      const sx = p.x + Math.sin(p.phase + time) * 2;
+      const sy = p.y + Math.cos(p.phase + time * 0.8) * 2;
 
-      // Depth-based size (simulate 3D)
-      const z    = Math.sin(p.phase + time * 0.5) * 0.5 + 1;
-      const size = p.size * z;
+      // Vary alpha slightly per particle (cheap: use globalAlpha before drawImage)
+      ctx.globalAlpha = 0.55 + Math.sin(p.phase + time * 0.6) * 0.2;
 
-      drawParticle(sx, sy, size, time + p.phase);
+      // Stamp pre-rendered sprite (fast!)
+      ctx.drawImage(p.sprite, sx - SPRITE_R, sy - SPRITE_R);
     }
 
     ctx.restore();
@@ -164,7 +153,6 @@ hamburger.addEventListener('click', () => {
   hamburger.classList.toggle('active', isOpen);
   document.body.style.overflow = isOpen ? 'hidden' : '';
 });
-
 document.querySelectorAll('.mobile-link').forEach(link => {
   link.addEventListener('click', () => {
     mobileMenu.classList.remove('open');
@@ -194,21 +182,18 @@ const revealObserver = new IntersectionObserver(
 );
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-/* Card bars */
 const cardBarObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
     entry.target.querySelectorAll('.card-bar').forEach((bar, i) => {
-      bar.style.transitionDelay = `${i * 0.15}s`;
-      bar.style.opacity = '1';
       bar.style.animation = `barGrow 1.2s cubic-bezier(0.16,1,0.3,1) ${i*0.15}s forwards`;
+      bar.style.opacity = '1';
     });
     cardBarObserver.unobserve(entry.target);
   });
 }, { threshold: 0.3 });
 document.querySelectorAll('.intro-card').forEach(c => cardBarObserver.observe(c));
 
-/* Portfolio bars */
 const pvBarObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
@@ -242,10 +227,7 @@ if (contactForm) {
     e.preventDefault();
     const btn = contactForm.querySelector('.btn-submit');
     const txt = btn.querySelector('.btn-submit-text');
-    btn.disabled = true;
-    txt.textContent = '送信中...';
-    btn.style.opacity = '0.7';
-
+    btn.disabled = true; txt.textContent = '送信中...'; btn.style.opacity = '0.7';
     setTimeout(() => {
       contactForm.style.display = 'none';
       formSuccess.classList.add('show');
@@ -254,9 +236,7 @@ if (contactForm) {
         formSuccess.classList.remove('show');
         contactForm.style.display = '';
         contactForm.reset();
-        btn.disabled = false;
-        txt.textContent = '送信する';
-        btn.style.opacity = '1';
+        btn.disabled = false; txt.textContent = '送信する'; btn.style.opacity = '1';
       }, 8000);
     }, 1400);
   });
@@ -267,74 +247,59 @@ if (contactForm) {
 ────────────────────────────────────────────── */
 if (!isMobile) {
   const glow = document.createElement('div');
-  glow.id = 'cursor-glow';
   Object.assign(glow.style, {
-    position: 'fixed', width: '400px', height: '400px',
-    borderRadius: '50%', pointerEvents: 'none', zIndex: '1',
-    transform: 'translate(-50%,-50%)',
-    background: 'radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%)',
-    top: '-200px', left: '-200px',
+    position:'fixed', width:'400px', height:'400px', borderRadius:'50%',
+    pointerEvents:'none', zIndex:'1', transform:'translate(-50%,-50%)',
+    background:'radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%)',
+    top:'-200px', left:'-200px',
   });
   document.body.appendChild(glow);
-
-  let cx = -200, cy = -200, tx = -200, ty = -200;
-  window.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
-  (function moveCursor() {
-    cx = lerp(cx, tx, 0.08);
-    cy = lerp(cy, ty, 0.08);
-    glow.style.left = cx + 'px';
-    glow.style.top  = cy + 'px';
-    requestAnimationFrame(moveCursor);
+  let cx=-200,cy=-200,tx=-200,ty=-200;
+  window.addEventListener('mousemove', e => { tx=e.clientX; ty=e.clientY; });
+  (function move() {
+    cx=lerp(cx,tx,0.08); cy=lerp(cy,ty,0.08);
+    glow.style.left=cx+'px'; glow.style.top=cy+'px';
+    requestAnimationFrame(move);
   })();
 }
 
 /* ──────────────────────────────────────────────
-   8. SCROLL SPY (active nav)
+   8. SCROLL SPY
 ────────────────────────────────────────────── */
 const navAnchors = document.querySelectorAll('.nav-links a');
-const spyObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting)
       navAnchors.forEach(a => {
-        a.style.color = a.getAttribute('href') === '#' + entry.target.id ? 'var(--cyan)' : '';
+        a.style.color = a.getAttribute('href') === '#'+e.target.id ? 'var(--cyan)' : '';
       });
-    }
   });
-}, { threshold: 0.4 });
-document.querySelectorAll('section[id]').forEach(s => spyObserver.observe(s));
+}, { threshold: 0.4 }).observe(document.querySelectorAll('section[id]'));
 
 /* ──────────────────────────────────────────────
-   9. COUNT-UP ANIMATION
+   9. COUNT-UP
 ────────────────────────────────────────────── */
-function animateCount(el, target, suffix, duration = 1400) {
-  let start = null;
-  (function step(ts) {
-    if (!start) start = ts;
-    const p = Math.min((ts - start) / duration, 1);
-    const e = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(e * target) + suffix;
+function animateCount(el, target, suffix) {
+  const start = performance.now();
+  (function step(now) {
+    const p = Math.min((now - start) / 1400, 1);
+    el.textContent = Math.round((1-(1-p)**3) * target) + suffix;
     if (p < 1) requestAnimationFrame(step);
-  })(performance.now());
+  })(start);
 }
-
-const statObserver = new IntersectionObserver(entries => {
+new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
-    const el  = entry.target;
-    const raw = el.dataset.count;
-    if (!raw) return;
-    animateCount(el, parseInt(raw, 10), el.dataset.suffix || '');
-    statObserver.unobserve(el);
+    const el = entry.target, raw = el.dataset.count;
+    if (raw) animateCount(el, +raw, el.dataset.suffix || '');
   });
-}, { threshold: 0.6 });
+}, { threshold: 0.6 }).observe(document.querySelectorAll('.stat-num'));
 
 document.querySelectorAll('.stat-num').forEach(el => {
   const m = el.textContent.trim().match(/^(\d+)(.*)$/);
   if (!m) return;
-  el.dataset.count  = m[1];
-  el.dataset.suffix = m[2] || '';
-  el.textContent    = '0' + (m[2] || '');
-  statObserver.observe(el);
+  el.dataset.count = m[1]; el.dataset.suffix = m[2]||'';
+  el.textContent = '0'+(m[2]||'');
 });
 
 /* ──────────────────────────────────────────────
@@ -343,8 +308,8 @@ document.querySelectorAll('.stat-num').forEach(el => {
 if (isMobile) {
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    document.querySelectorAll('.mobile-orb').forEach((orb, i) => {
-      orb.style.transform = `translateY(${y * (0.15 + i * 0.07)}px)`;
+    document.querySelectorAll('.mobile-orb').forEach((o,i) => {
+      o.style.transform = `translateY(${y*(0.15+i*0.07)}px)`;
     });
   });
 }
