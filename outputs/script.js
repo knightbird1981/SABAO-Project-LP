@@ -78,22 +78,39 @@ const isMobile = window.innerWidth < 768;
   let pts = buildParticles();
 
   /* --- 状態 --- */
-  let lockedX    = -9999, lockedY = -9999; // 収束先（マウスが止まった座標）
-  let converging = false;
-  let stopTimer  = null;
-  let time       = 0;
+  let lockedX      = -9999, lockedY = -9999; // 収束先（マウスが止まった座標）
+  let converging   = false;
+  let cursorInside = false; // ウィンドウ内にカーソルがあるか
+  let stopTimer    = null;
+  let time         = 0;
 
+  /* マウスがウィンドウ内を動いている間 */
   window.addEventListener('mousemove', e => {
+    cursorInside = true;
+
     // マウスが動き出したら即拡散
     if (converging) converging = false;
 
-    // 止まってから 250ms 後に収束先を固定
+    // 止まってから 250ms 後に収束先を固定（ウィンドウ内のみ）
     clearTimeout(stopTimer);
     stopTimer = setTimeout(() => {
+      if (!cursorInside) return; // ウィンドウ外なら収束しない
       lockedX    = e.clientX;
       lockedY    = e.clientY;
       converging = true;
     }, 250);
+  });
+
+  /* カーソルがウィンドウ外へ出た → 強制拡散 */
+  document.addEventListener('mouseleave', () => {
+    cursorInside = false;
+    converging   = false;
+    clearTimeout(stopTimer);
+  });
+
+  /* カーソルがウィンドウ内に戻った */
+  document.addEventListener('mouseenter', () => {
+    cursorInside = true;
   });
 
   window.addEventListener('resize', () => {
@@ -107,24 +124,31 @@ const isMobile = window.innerWidth < 768;
     requestAnimationFrame(animate);
     time += 0.022;
 
-    // 拡散はマウス移動時のみ（時間トリガーなし）
-
     ctx.clearRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'lighter';
 
     for (let i = 0; i < NUM; i++) {
       const p = pts[i];
 
-      /* 目標位置：収束は固定座標、拡散は画面外 */
-      const tx = converging ? lockedX + p.cox : p.sx;
-      const ty = converging ? lockedY + p.coy : p.sy;
+      /* 目標位置：
+         収束 → 固定カーソル座標 + クラスターオフセット
+         拡散 → 画面外の散乱座標 + 時間で緩やかにうねる漂流 */
+      let tx, ty;
+      if (converging) {
+        tx = lockedX + p.cox;
+        ty = lockedY + p.coy;
+      } else {
+        // 拡散中：ゆっくり流れる漂流（振幅 80px, 個体差あり）
+        tx = p.sx + Math.sin(p.phase * 1.7 + time * 0.18) * 80;
+        ty = p.sy + Math.cos(p.phase * 1.3 + time * 0.14) * 80;
+      }
 
-      /* lerp 速度：収束は速く、拡散も速く */
+      /* lerp 速度：収束はゆっくり、拡散は速め */
       const spd = converging ? 0.027 : 0.075;
       p.x = lerp(p.x, tx, spd);
       p.y = lerp(p.y, ty, spd);
 
-      /* 有機的な揺らぎ */
+      /* 有機的な揺らぎ（常時） */
       const sx = p.x + Math.sin(p.phase + time)       * 3.5;
       const sy = p.y + Math.cos(p.phase + time * 0.8) * 3.5;
 
