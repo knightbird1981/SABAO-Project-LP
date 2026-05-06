@@ -44,7 +44,7 @@ const isMobile = window.innerWidth < 768;
 
   /* --- パーティクル生成 --- */
   const NUM       = 3500;
-  const CLUSTER_R = 95;   // カーソル周辺の群がり半径 (px)
+  const CLUSTER_R = 50;   // カーソル周辺の群がり半径 (px)
 
   function buildParticles() {
     const arr = [];
@@ -78,21 +78,21 @@ const isMobile = window.innerWidth < 768;
   let pts = buildParticles();
 
   /* --- 状態 --- */
-  let lockedX  = -9999, lockedY = -9999; // 収束先（マウスが止まった座標）
+  let lockedX    = -9999, lockedY = -9999; // 収束先（マウスが止まった座標）
   let converging = false;
-  let lockTime   = 0;
   let stopTimer  = null;
   let time       = 0;
 
   window.addEventListener('mousemove', e => {
-    // マウスが止まってから 250ms 後に収束先を固定
-    // → 動いている間は追従しない
+    // マウスが動き出したら即拡散
+    if (converging) converging = false;
+
+    // 止まってから 250ms 後に収束先を固定
     clearTimeout(stopTimer);
     stopTimer = setTimeout(() => {
       lockedX    = e.clientX;
       lockedY    = e.clientY;
       converging = true;
-      lockTime   = Date.now();
     }, 250);
   });
 
@@ -107,8 +107,7 @@ const isMobile = window.innerWidth < 768;
     requestAnimationFrame(animate);
     time += 0.022;
 
-    // 収束後 1.2秒 → 拡散開始（前回より1.3秒速い）
-    if (converging && Date.now() - lockTime > 1200) converging = false;
+    // 拡散はマウス移動時のみ（時間トリガーなし）
 
     ctx.clearRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'lighter';
