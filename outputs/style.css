@@ -42,9 +42,10 @@ button { cursor: pointer; font-family: inherit; }
 /* ======================================
    ACCENT COLORS
 ====================================== */
-.accent-cyan   { color: var(--cyan); }
-.accent-green  { color: var(--green); }
-.accent-purple { color: var(--purple-dim); }
+.accent-cyan       { color: var(--cyan); }
+.accent-green      { color: var(--green); }
+.accent-purple     { color: var(--purple-dim); }
+.accent-lightgreen { color: #6EE7A0; }
 
 /* ======================================
    THREE.JS CANVAS
