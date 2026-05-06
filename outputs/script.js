@@ -236,25 +236,46 @@ if (scrollHint) {
 /* ──────────────────────────────────────────────
    6. CONTACT FORM
 ────────────────────────────────────────────── */
+/* ▶ Formspree のフォーム ID を差し替えてください
+   　 例: 'https://formspree.io/f/xpwzabcd' */
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mzdogkpr';
+
 const contactForm = document.getElementById('contactForm');
 const formSuccess = document.getElementById('formSuccess');
 if (contactForm) {
-  contactForm.addEventListener('submit', e => {
+  contactForm.addEventListener('submit', async e => {
     e.preventDefault();
     const btn = contactForm.querySelector('.btn-submit');
     const txt = btn.querySelector('.btn-submit-text');
     btn.disabled = true; txt.textContent = '送信中...'; btn.style.opacity = '0.7';
-    setTimeout(() => {
-      contactForm.style.display = 'none';
-      formSuccess.classList.add('show');
-      formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => {
-        formSuccess.classList.remove('show');
-        contactForm.style.display = '';
-        contactForm.reset();
+
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        body: new FormData(contactForm),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok) {
+        contactForm.style.display = 'none';
+        formSuccess.classList.add('show');
+        formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          formSuccess.classList.remove('show');
+          contactForm.style.display = '';
+          contactForm.reset();
+          btn.disabled = false; txt.textContent = '送信する'; btn.style.opacity = '1';
+        }, 8000);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.errors ? data.errors.map(e => e.message).join(', ') : '送信に失敗しました。';
+        alert('エラー: ' + msg);
         btn.disabled = false; txt.textContent = '送信する'; btn.style.opacity = '1';
-      }, 8000);
-    }, 1400);
+      }
+    } catch (err) {
+      alert('ネットワークエラーが発生しました。時間をおいて再度お試しください。');
+      btn.disabled = false; txt.textContent = '送信する'; btn.style.opacity = '1';
+    }
   });
 }
 
