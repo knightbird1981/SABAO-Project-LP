@@ -78,16 +78,22 @@ const isMobile = window.innerWidth < 768;
   let pts = buildParticles();
 
   /* --- 状態 --- */
-  let cursorX = W / 2, cursorY = H / 2;
+  let lockedX  = -9999, lockedY = -9999; // 収束先（マウスが止まった座標）
   let converging = false;
-  let lastMove   = 0;
+  let lockTime   = 0;
+  let stopTimer  = null;
   let time       = 0;
 
   window.addEventListener('mousemove', e => {
-    cursorX    = e.clientX;
-    cursorY    = e.clientY;
-    converging = true;
-    lastMove   = Date.now();
+    // マウスが止まってから 250ms 後に収束先を固定
+    // → 動いている間は追従しない
+    clearTimeout(stopTimer);
+    stopTimer = setTimeout(() => {
+      lockedX    = e.clientX;
+      lockedY    = e.clientY;
+      converging = true;
+      lockTime   = Date.now();
+    }, 250);
   });
 
   window.addEventListener('resize', () => {
@@ -101,21 +107,21 @@ const isMobile = window.innerWidth < 768;
     requestAnimationFrame(animate);
     time += 0.022;
 
-    // アイドル 2.5秒 → 拡散
-    if (lastMove > 0 && Date.now() - lastMove > 2500) converging = false;
+    // 収束後 1.2秒 → 拡散開始（前回より1.3秒速い）
+    if (converging && Date.now() - lockTime > 1200) converging = false;
 
     ctx.clearRect(0, 0, W, H);
-    ctx.globalCompositeOperation = 'lighter'; // 加算合成 → グロー効果
+    ctx.globalCompositeOperation = 'lighter';
 
     for (let i = 0; i < NUM; i++) {
       const p = pts[i];
 
-      /* 目標位置 */
-      const tx = converging ? cursorX + p.cox : p.sx;
-      const ty = converging ? cursorY + p.coy : p.sy;
+      /* 目標位置：収束は固定座標、拡散は画面外 */
+      const tx = converging ? lockedX + p.cox : p.sx;
+      const ty = converging ? lockedY + p.coy : p.sy;
 
-      /* lerp 速度：収束は速く、拡散はゆっくり流れる */
-      const spd = converging ? 0.055 : 0.032;
+      /* lerp 速度：収束は速く、拡散も速く */
+      const spd = converging ? 0.055 : 0.075;
       p.x = lerp(p.x, tx, spd);
       p.y = lerp(p.y, ty, spd);
 
