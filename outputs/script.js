@@ -120,7 +120,7 @@ const isMobile = window.innerWidth < 768;
       const ty = converging ? lockedY + p.coy : p.sy;
 
       /* lerp 速度：収束は速く、拡散も速く */
-      const spd = converging ? 0.055 : 0.075;
+      const spd = converging ? 0.027 : 0.075;
       p.x = lerp(p.x, tx, spd);
       p.y = lerp(p.y, ty, spd);
 
