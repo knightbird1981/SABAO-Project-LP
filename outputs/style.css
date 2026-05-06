@@ -299,24 +299,25 @@ button { cursor: pointer; font-family: inherit; }
   max-width: 800px;
 }
 .hero-eyebrow {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.25em;
+  font-family: 'Grand Hotel', cursive;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--cyan);
+  color: #D4A843;
   margin-bottom: 24px;
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  text-shadow: 0 0 20px rgba(212, 168, 67, 0.5);
 }
 .hero-eyebrow::before, .hero-eyebrow::after {
   content: '';
   display: block;
   width: 32px;
   height: 1px;
-  background: var(--cyan);
-  opacity: 0.6;
+  background: #D4A843;
+  opacity: 0.7;
 }
 .hero-headline {
   font-size: clamp(4rem, 10vw, 8rem);
@@ -329,12 +330,13 @@ button { cursor: pointer; font-family: inherit; }
 .hero-headline .accent-green { text-shadow: 0 0 40px rgba(57,255,20,0.4); }
 
 .hero-headline-en {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 300;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  font-family: 'Grand Hotel', cursive;
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: #D4A843;
+  opacity: 0.85;
   margin-bottom: 24px;
 }
 .hero-body {
