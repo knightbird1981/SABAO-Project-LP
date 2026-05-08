@@ -550,7 +550,7 @@ button { cursor: pointer; font-family: inherit; }
 .win-dot.green  { background: #28c840; }
 .card-tag {
   font-family: 'Inter', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -567,7 +567,7 @@ button { cursor: pointer; font-family: inherit; }
 }
 .card-line-stack .line-label {
   width: auto;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
 }
 .card-bar-row {
   display: flex;
@@ -599,6 +599,8 @@ button { cursor: pointer; font-family: inherit; }
 .line-label.accent-cyan   { color: var(--cyan); }
 .line-label.accent-green  { color: var(--green-dim); }
 .line-label.accent-purple { color: var(--purple-dim); }
+.line-label.accent-yellow { color: #F5C842; }
+.line-label.accent-pink   { color: #FF6EB4; }
 .card-bar {
   height: 6px;
   background: linear-gradient(90deg, var(--cyan), var(--purple-dim));
