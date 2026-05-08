@@ -579,13 +579,18 @@ button { cursor: pointer; font-family: inherit; }
 }
 .bar-pct {
   font-family: 'Inter', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-muted);
   flex-shrink: 0;
-  width: 32px;
+  width: 36px;
   text-align: right;
 }
+.bar-pct.pct-purple { color: var(--purple-dim); }
+.bar-pct.pct-cyan   { color: var(--cyan); }
+.bar-pct.pct-green  { color: var(--green-dim); }
+.bar-pct.pct-yellow { color: #F5C842; }
+.bar-pct.pct-pink   { color: #FF6EB4; }
 
 .line-label {
   font-family: 'Inter', sans-serif;
@@ -602,13 +607,18 @@ button { cursor: pointer; font-family: inherit; }
 .line-label.accent-yellow { color: #F5C842; }
 .line-label.accent-pink   { color: #FF6EB4; }
 .card-bar {
-  height: 6px;
+  height: 9px;
   background: linear-gradient(90deg, var(--cyan), var(--purple-dim));
-  border-radius: 3px;
+  border-radius: 4px;
   animation: barGrow 1.5s var(--transition) forwards;
   transform-origin: left;
   opacity: 0;
 }
+.card-bar.bar-purple { background: linear-gradient(90deg, var(--purple), var(--purple-dim)); }
+.card-bar.bar-cyan   { background: linear-gradient(90deg, var(--cyan), #6af0ff); }
+.card-bar.bar-green  { background: linear-gradient(90deg, var(--green-dim), #7fff6a); }
+.card-bar.bar-yellow { background: linear-gradient(90deg, #F5C842, #ffe08a); }
+.card-bar.bar-pink   { background: linear-gradient(90deg, #FF6EB4, #ffaad4); }
 .visible .card-bar { opacity: 1; animation: barGrow 1.5s var(--transition) forwards; }
 @keyframes barGrow {
   from { transform: scaleX(0); opacity: 0; }
@@ -661,7 +671,8 @@ button { cursor: pointer; font-family: inherit; }
 ====================================== */
 #skills {
   position: relative;
-  background: var(--bg-deep);
+  background: rgba(11, 26, 43, 0.6);
+  backdrop-filter: blur(2px);
   padding: 120px 40px;
   z-index: 2;
   overflow: hidden;
@@ -988,7 +999,8 @@ button { cursor: pointer; font-family: inherit; }
 ====================================== */
 #process {
   position: relative;
-  background: var(--bg-deep);
+  background: rgba(11, 26, 43, 0.6);
+  backdrop-filter: blur(2px);
   padding: 120px 40px;
   z-index: 2;
   overflow: hidden;
@@ -1073,7 +1085,8 @@ button { cursor: pointer; font-family: inherit; }
 ====================================== */
 #contact {
   position: relative;
-  background: var(--bg-base);
+  background: rgba(11, 26, 43, 0.6);
+  backdrop-filter: blur(2px);
   padding: 120px 40px 140px;
   z-index: 2;
   overflow: hidden;
