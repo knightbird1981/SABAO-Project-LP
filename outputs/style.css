@@ -425,7 +425,8 @@ button { cursor: pointer; font-family: inherit; }
 ====================================== */
 #intro {
   position: relative;
-  background: var(--bg-base);
+  background: rgba(11, 26, 43, 0.6); /* 粒子が透けて見える程度に透過 */
+  backdrop-filter: blur(2px);
   padding: 120px 40px;
   z-index: 2;
   overflow: hidden;
@@ -455,7 +456,21 @@ button { cursor: pointer; font-family: inherit; }
   font-size: 0.95rem;
   color: var(--text-muted);
   line-height: 1.9;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
+}
+.intro-body-last {
+  margin-bottom: 0;
+}
+
+/* 2つ目のH2（ヒアリング力） */
+.intro-h2-sub {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
 }
 .intro-stats {
   display: flex;
@@ -543,6 +558,35 @@ button { cursor: pointer; font-family: inherit; }
 }
 .card-body { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
 .card-line-wrap { display: flex; align-items: center; gap: 12px; }
+
+/* 2段レイアウト：ラベル上 / バー下 */
+.card-line-stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.card-line-stack .line-label {
+  width: auto;
+  font-size: 0.72rem;
+}
+.card-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-bar-row .card-bar {
+  flex: 1;
+}
+.bar-pct {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  width: 32px;
+  text-align: right;
+}
+
 .line-label {
   font-family: 'Inter', sans-serif;
   font-size: 0.7rem;
