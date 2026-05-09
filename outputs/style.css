@@ -440,10 +440,11 @@ button { cursor: pointer; font-family: inherit; }
   align-items: center;
 }
 .intro-text h2 {
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 24px;
+  white-space: nowrap;
 }
 .intro-lead {
   font-size: 1.1rem;
@@ -467,6 +468,7 @@ button { cursor: pointer; font-family: inherit; }
   font-size: clamp(1.6rem, 3vw, 2.4rem);
   font-weight: 800;
   line-height: 1.2;
+  white-space: normal;
   margin-top: 48px;
   margin-bottom: 20px;
   padding-top: 40px;
