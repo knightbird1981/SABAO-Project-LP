@@ -440,7 +440,7 @@ button { cursor: pointer; font-family: inherit; }
   align-items: center;
 }
 .intro-text h2 {
-  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+  font-size: clamp(2rem, 3.4vw, 3rem);
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 24px;
@@ -465,7 +465,7 @@ button { cursor: pointer; font-family: inherit; }
 
 /* 2つ目のH2（ヒアリング力） */
 .intro-h2-sub {
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(2rem, 3.4vw, 3rem);
   font-weight: 800;
   line-height: 1.2;
   white-space: normal;
