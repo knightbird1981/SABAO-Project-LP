@@ -1,7 +1,7 @@
 /* ============================================================
    SABAO Project LP — script.js
-   ・カーソルに群がる光の粒子 (収束)
-   ・画面外まで散らばる (拡散)
+   ・カーソル周辺250px以内の粒子のみ収束
+   ・範囲外の粒子は画面上をゆっくり漂流
    Three.js 不使用 / Pure Canvas 2D
 ============================================================ */
 
@@ -43,28 +43,31 @@ const isMobile = window.innerWidth < 768;
   const spriteGreen  = makeSprite(57,  255, 20,  SR);
 
   /* --- パーティクル生成 --- */
-  const NUM       = 3500;
-  const CLUSTER_R = 50;   // カーソル周辺の群がり半径 (px)
+  const NUM         = 3500;
+  const CLUSTER_R   = 50;   // 収束時のクラスター半径 (px)
+  const EFFECT_R    = 250;  // カーソルの有効影響半径 (px)
 
   function buildParticles() {
     const arr = [];
     for (let i = 0; i < NUM; i++) {
       const angle = Math.random() * Math.PI * 2;
-      // sqrt でより均一な円分布（中心に集まりすぎない）
       const dist  = Math.sqrt(Math.random()) * CLUSTER_R;
+
+      // ホーム位置：画面全体（±10%の余白含む）にランダム配置
+      const hx = (Math.random() * 1.2 - 0.1) * W;
+      const hy = (Math.random() * 1.2 - 0.1) * H;
 
       arr.push({
         // 収束時：カーソルからのオフセット
         cox: Math.cos(angle) * dist,
         coy: Math.sin(angle) * dist,
 
-        // 拡散時：画面外のランダム位置（±2倍スクリーン）
-        sx: (Math.random() - 0.5) * W * 4,
-        sy: (Math.random() - 0.5) * H * 4,
+        // ホーム位置（漂流の基点）
+        hx, hy,
 
-        // 現在位置（初期は散らばり）
-        x:  (Math.random() - 0.5) * W * 4,
-        y:  (Math.random() - 0.5) * H * 4,
+        // 現在位置（初期はホーム付近）
+        x: hx + (Math.random() - 0.5) * 100,
+        y: hy + (Math.random() - 0.5) * 100,
 
         phase:  Math.random() * Math.PI * 2,
         sprite: i % 10 < 7 ? spriteCyan
@@ -130,21 +133,36 @@ const isMobile = window.innerWidth < 768;
     for (let i = 0; i < NUM; i++) {
       const p = pts[i];
 
-      /* 目標位置：
-         収束 → 固定カーソル座標 + クラスターオフセット
-         拡散 → 画面外の散乱座標 + 時間で緩やかにうねる漂流 */
-      let tx, ty;
+      /* ホーム位置での漂流（常時ベース） */
+      const driftX = p.hx + Math.sin(p.phase * 1.7 + time * 0.18) * 40;
+      const driftY = p.hy + Math.cos(p.phase * 1.3 + time * 0.14) * 40;
+
+      let tx, ty, spd;
+
       if (converging) {
-        tx = lockedX + p.cox;
-        ty = lockedY + p.coy;
+        /* カーソルとホーム位置の距離を計算 */
+        const dx   = p.hx - lockedX;
+        const dy   = p.hy - lockedY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < EFFECT_R) {
+          /* 有効範囲内 → カーソルに収束 */
+          tx  = lockedX + p.cox;
+          ty  = lockedY + p.coy;
+          spd = 0.027;
+        } else {
+          /* 有効範囲外 → ホームで漂流 */
+          tx  = driftX;
+          ty  = driftY;
+          spd = 0.04;
+        }
       } else {
-        // 拡散中：ゆっくり流れる漂流（振幅 80px, 個体差あり）
-        tx = p.sx + Math.sin(p.phase * 1.7 + time * 0.18) * 80;
-        ty = p.sy + Math.cos(p.phase * 1.3 + time * 0.14) * 80;
+        /* 拡散中（カーソル移動 or ウィンドウ外）→ 全粒子がホームで漂流 */
+        tx  = driftX;
+        ty  = driftY;
+        spd = 0.05;
       }
 
-      /* lerp 速度：収束はゆっくり、拡散は速め */
-      const spd = converging ? 0.027 : 0.075;
       p.x = lerp(p.x, tx, spd);
       p.y = lerp(p.y, ty, spd);
 
