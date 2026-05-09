@@ -745,7 +745,7 @@ button { cursor: pointer; font-family: inherit; }
 .skill-icon { font-size: 1.4rem; color: var(--cyan); }
 .skill-card h3 {
   font-family: 'Inter', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.22rem;
   font-weight: 700;
   margin-bottom: 12px;
 }
