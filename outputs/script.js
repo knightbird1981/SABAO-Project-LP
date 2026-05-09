@@ -45,7 +45,7 @@ const isMobile = window.innerWidth < 768;
   /* --- パーティクル生成 --- */
   const NUM         = 3500;
   const CLUSTER_R   = 50;   // 収束時のクラスター半径 (px)
-  const EFFECT_R    = 250;  // カーソルの有効影響半径 (px)
+  const EFFECT_R    = 300;  // カーソルの有効影響半径 (px)
 
   function buildParticles() {
     const arr = [];
@@ -146,10 +146,13 @@ const isMobile = window.innerWidth < 768;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < EFFECT_R) {
-          /* 有効範囲内 → カーソルに収束 */
-          tx  = lockedX + p.cox;
-          ty  = lockedY + p.coy;
-          spd = 0.027;
+          /* 距離に応じた収束強度（べき乗カーブ：近いほど強く、遠いほど弱い） */
+          const strength = Math.pow(1 - dist / EFFECT_R, 1.8);
+
+          /* 収束先とホーム漂流をstrengthでブレンド */
+          tx  = lerp(driftX, lockedX + p.cox, strength);
+          ty  = lerp(driftY, lockedY + p.coy, strength);
+          spd = 0.025 + strength * 0.02; // 近いほどやや速く収束
         } else {
           /* 有効範囲外 → ホームで漂流 */
           tx  = driftX;
